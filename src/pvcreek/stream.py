@@ -30,14 +30,14 @@ def is_cached(filename: str | datetime, target_dir: Path) -> bool:
 
 
 def download(
-    filename: str | datetime, target_dir: Path, base_url: str = BASE_URL
+    filename: str | datetime, target_dir: str | Path, base_url: str = BASE_URL
 ) -> Path:
     """Download a file from the remote server to the local file system. Use
     this if you want to cache the gzipped file.
 
     Args:
         filename (str | datetime): The file to download.
-        target_dir (Path): The target path to save the downloaded file.
+        target_dir (str | Path): The target path to save the downloaded file.
         base_url (str): Base URL for the pageviews server.
 
     Returns:
@@ -45,6 +45,8 @@ def download(
     """
     if isinstance(filename, datetime):
         filename = filename_from_timestamp(filename)
+    if isinstance(target_dir, str):
+        target_dir = Path(target_dir)
 
     url = url_from_filename(base_url, filename)
 

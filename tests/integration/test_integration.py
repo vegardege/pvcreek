@@ -37,11 +37,11 @@ def test_full() -> None:
                 pvcreek(
                     filename,
                     base_url=base_url,
-                    cache_path=Path(tempdir),
-                    language="en",
+                    cache_path=tempdir,
+                    line_regex=r"^en",
                 )
             )
-            assert len(downloaded) == 425
+            assert len(downloaded) == 412
             assert all(pv.language == "en" for pv in downloaded)
 
             # Second pass should not download, but still be able to
@@ -52,7 +52,7 @@ def test_full() -> None:
                     filename,
                     base_url=base_url,
                     cache_path=Path(tempdir),
-                    language="no",
+                    line_regex=r"^no",
                 )
             )
             assert len(downloaded) == 5
