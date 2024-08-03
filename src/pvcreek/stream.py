@@ -56,7 +56,7 @@ def download(
             response.raise_for_status()
 
             with open(target, "wb") as f:
-                for chunk in response.iter_content(chunk_size=8192):
+                for chunk in response.iter_content(chunk_size=65_536):
                     f.write(chunk)
 
         return target
@@ -100,8 +100,8 @@ def stream_local(file: Path) -> Generator[str, None, None]:
         str: A line from the pageviews file.
     """
     with gzip.open(file, "rb") as f:
-        for line in f:
-            yield line.decode("utf-8").rstrip("\n")
+        with io.TextIOWrapper(f, encoding="utf-8") as decoder:
+            yield from decoder
 
 
 def stream_remote(
@@ -125,9 +125,8 @@ def stream_remote(
         response.raise_for_status()
 
         with gzip.GzipFile(fileobj=response.raw) as gz:
-            with io.TextIOWrapper(gz, encoding="utf-8") as reader:
-                for line in reader:
-                    yield line.rstrip("\n")
+            with io.TextIOWrapper(gz, encoding="utf-8") as decoder:
+                yield from decoder
 
 
 def filename_from_timestamp(timestamp: datetime) -> str:

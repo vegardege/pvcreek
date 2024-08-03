@@ -32,7 +32,7 @@ def test_parse_domain_code_invalid() -> None:
 
 def test_parse_line() -> None:
     """Test the parsing of a single line."""
-    assert parse_line("en.d circumfluebant 1 0") == Pageviews(
+    assert parse_line("en.d circumfluebant 1 0\n") == Pageviews(
         domain_code="en.d",
         page_title="circumfluebant",
         count_views=1,
@@ -40,7 +40,7 @@ def test_parse_line() -> None:
         project="wiktionary.org",
         mobile=False,
     )
-    assert parse_line("ko 서울_지하철_7호선 2 0") == Pageviews(
+    assert parse_line("ko 서울_지하철_7호선 2 0\n") == Pageviews(
         domain_code="ko",
         page_title="서울_지하철_7호선",
         count_views=2,
@@ -53,8 +53,8 @@ def test_parse_line() -> None:
 def test_parse() -> None:
     """Test the full parsing function."""
     lines = [
-        "en.d circumfluebant 1 0",
-        "ko 서울_지하철_7호선 2 0",
+        "en.d circumfluebant 1 0\n",
+        "ko 서울_지하철_7호선 2 0\n",
     ]
     expected = [
         Pageviews(

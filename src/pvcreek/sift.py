@@ -43,22 +43,27 @@ def sift(
     Yields:
         Pageviews: Subset of the stream matching all filters.
     """
+    comparators = []
+
+    if domain_code is not None:
+        comparators.append(lambda pv: compare_str(domain_code, pv.domain_code))
+    if page_title is not None:
+        comparators.append(lambda pv: compare_str(page_title, pv.page_title))
+    if min_views is not None or max_views is not None:
+        comparators.append(lambda pv: compare_int(min_views, max_views, pv.count_views))
+    if language is not None:
+        comparators.append(lambda pv: compare_str(language, pv.language))
+    if project is not None:
+        comparators.append(lambda pv: compare_str(project, pv.project))
+    if mobile is not None:
+        comparators.append(lambda pv: compare_bool(mobile, pv.mobile))
+
     for pageviews in stream:
-
-        comparators = [
-            compare_str(domain_code, pageviews.domain_code),
-            compare_str(page_title, pageviews.page_title),
-            compare_int(min_views, max_views, pageviews.count_views),
-            compare_str(language, pageviews.language),
-            compare_str(project, pageviews.project),
-            compare_bool(mobile, pageviews.mobile),
-        ]
-
-        if all(comparators):
+        if not comparators or all(f(pageviews) for f in comparators):
             yield pageviews
 
 
-def compare_str(filter_value: Optional[str | re.Pattern], target: str) -> bool:
+def compare_str(filter_value: str | re.Pattern, target: str) -> bool:
     """Filter a string value against a target.
 
     Args:
@@ -70,9 +75,6 @@ def compare_str(filter_value: Optional[str | re.Pattern], target: str) -> bool:
     Returns:
         bool: True if the value matches the target or if the value is None.
     """
-    if filter_value is None:
-        return True
-
     if isinstance(filter_value, re.Pattern):
         return bool(filter_value.match(target))
 
@@ -103,7 +105,7 @@ def compare_int(
     return True
 
 
-def compare_bool(value: Optional[bool], target: bool) -> bool:
+def compare_bool(value: bool, target: bool) -> bool:
     """Filter a boolean value against a target.
 
     Args:
@@ -114,7 +116,4 @@ def compare_bool(value: Optional[bool], target: bool) -> bool:
     Returns:
         bool: True if the value matches the target or if the value is None.
     """
-    if value is None:
-        return True
-
     return value == target

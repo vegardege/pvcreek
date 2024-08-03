@@ -38,14 +38,14 @@ def verify_pageviews_content(generator: Generator[str]) -> None:
     # Read the two first lines
     rows = [next(generator), next(generator)]
 
-    assert rows[0] == "en.d circumfluebant 1 0"
-    assert rows[1] == "ko 서울_지하철_7호선 2 0"
+    assert rows[0] == "en.d circumfluebant 1 0\n"
+    assert rows[1] == "ko 서울_지하철_7호선 2 0\n"
 
     # Exhaust the generator to ensure all lines are read
     rows.extend(generator)
 
     assert len(rows) == 1000
-    assert rows[-1] == "da Linjeløb 2 0"
+    assert rows[-1] == "da Linjeløb 2 0\n"
 
 
 def test_filename_from_timestamp_accurate() -> None:

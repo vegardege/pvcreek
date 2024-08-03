@@ -1,5 +1,6 @@
 from collections.abc import Generator, Iterable
 from dataclasses import dataclass
+from functools import lru_cache
 
 DOMAINS = {
     "": "wikipedia.org",
@@ -74,7 +75,7 @@ def parse_line(line: str) -> Pageviews:
     Returns:
         Pageviews: The parsed pageviews object.
     """
-    domain_code, page_title, count_views, _ = line.split()
+    domain_code, page_title, count_views, _ = line.split(" ", 3)
     language, project, mobile = parse_domain_code(domain_code)
 
     return Pageviews(
@@ -87,6 +88,7 @@ def parse_line(line: str) -> Pageviews:
     )
 
 
+@lru_cache(maxsize=None)
 def parse_domain_code(domain_code: str) -> tuple[str, str, bool]:
     """Extract the language, project, and mobile status from the domain code
     according to the rules from:
