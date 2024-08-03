@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "pvcreek"
+version = "0.1.0"
+description = "Stream download, filter, and parse Wikimedia pageviews files"
+authors = ["Vegard Egeland <vegardegeland@gmail.com>"]
+license = "MIT License"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+requests = "^2.32.3"
+
+[tool.poetry.group.dev.dependencies]
+black = "24.8.0"
+isort = "5.13.2"
+mypy = "1.11.1"
+pytest = "8.3.2"
+flake8 = "7.1.0"
+pytest-cov = "5.0.0"
+
+[tool.isort]
+profile = "black"
+src_paths = ["src", "tests"]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
