@@ -18,9 +18,17 @@ pytest = "8.3.2"
 flake8 = "7.1.0"
 pytest-cov = "5.0.0"
 
+[[tool.poetry.packages]]
+include = "pvcreek"
+from = "src"
+
 [tool.isort]
 profile = "black"
 src_paths = ["src", "tests"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+markers = ["integration: Integration tests running a mock server."]
 
 [build-system]
 requires = ["poetry-core"]
