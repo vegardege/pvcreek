@@ -11,26 +11,57 @@ BASE_URL = "https://dumps.wikimedia.org/other/pageviews/"
 FILENAME = re.compile(r"^pageviews-(\d{4})(\d{2})\d{2}-\d{2}0000\.gz$")
 
 
-def download(filename: str | datetime, target: Path, base_url: str = BASE_URL) -> None:
+def is_cached(filename: str | datetime, target_dir: Path) -> bool:
+    """Check if a file is cached in the target directory.
+
+    Args:
+        filename (str | datetime): The file to check.
+        target_dir (Path): The target directory to check.
+
+    Returns:
+        bool: True if the file is cached, False otherwise.
+    """
+    if isinstance(filename, datetime):
+        filename = filename_from_timestamp(filename)
+
+    target = target_dir / filename
+
+    return target.exists()
+
+
+def download(
+    filename: str | datetime, target_dir: Path, base_url: str = BASE_URL
+) -> Path:
     """Download a file from the remote server to the local file system. Use
     this if you want to cache the gzipped file.
 
     Args:
         filename (str | datetime): The file to download.
-        target (Path): The target path to save the downloaded file.
+        target_dir (Path): The target path to save the downloaded file.
         base_url (str): Base URL for the pageviews server.
+
+    Returns:
+        Path: The path to the downloaded file.
     """
     if isinstance(filename, datetime):
         filename = filename_from_timestamp(filename)
 
     url = url_from_filename(base_url, filename)
 
-    with requests.get(url, stream=True) as response:
-        response.raise_for_status()
+    target_dir.mkdir(parents=True, exist_ok=True)
+    target = target_dir / filename
 
-        with open(target, "wb") as f:
-            for chunk in response.iter_content(chunk_size=8192):
-                f.write(chunk)
+    if not is_cached(filename, target_dir):
+        with requests.get(url, stream=True) as response:
+            response.raise_for_status()
+
+            with open(target, "wb") as f:
+                for chunk in response.iter_content(chunk_size=8192):
+                    f.write(chunk)
+
+        return target
+
+    return target
 
 
 def stream(

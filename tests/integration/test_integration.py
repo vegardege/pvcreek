@@ -10,7 +10,53 @@ from pathlib import Path
 
 import pytest
 
-from pvcreek.stream import download, stream, stream_remote
+from pvcreek import pvcreek
+from pvcreek.stream import download, is_cached, stream, stream_remote
+
+
+@pytest.mark.integration
+def test_full() -> None:
+    """Test the full pipeline from download to sift."""
+    root = Path(__file__).parent.parent / "files"
+    port = 8080
+    base_url = f"http://127.0.0.1:{port}/"
+
+    with run_file_server(root, port):
+        filename = "pageviews-20240803-060000.gz"
+
+        # Test pure streaming
+        streamed_lines = list(pvcreek(filename, base_url=base_url))
+        assert len(streamed_lines) == 1000
+
+        # Test cached streaming
+        with tempfile.TemporaryDirectory() as tempdir:
+
+            # First pass should download the file
+            assert is_cached(filename, Path(tempdir)) is False
+            downloaded = list(
+                pvcreek(
+                    filename,
+                    base_url=base_url,
+                    cache_path=Path(tempdir),
+                    language="en",
+                )
+            )
+            assert len(downloaded) == 425
+            assert all(pv.language == "en" for pv in downloaded)
+
+            # Second pass should not download, but still be able to
+            # apply a different filter when streaming.
+            assert is_cached(filename, Path(tempdir)) is True
+            downloaded = list(
+                pvcreek(
+                    filename,
+                    base_url=base_url,
+                    cache_path=Path(tempdir),
+                    language="no",
+                )
+            )
+            assert len(downloaded) == 5
+            assert all(pv.language == "no" for pv in downloaded)
 
 
 @pytest.mark.integration
@@ -26,19 +72,18 @@ def test_download() -> None:
 
         with tempfile.TemporaryDirectory() as tempdir:
 
-            target = Path(tempdir) / filename
-            download(filename, target, base_url=base_url)
+            assert is_cached(filename, Path(tempdir)) is False
+            download(filename, Path(tempdir), base_url=base_url)
 
-            assert target.exists()
-            assert target.is_file()
+            # Downloading twice is effectively a no-op
+            assert is_cached(filename_ts, Path(tempdir)) is True
+            download(filename, Path(tempdir), base_url=base_url)
 
         with tempfile.TemporaryDirectory() as tempdir:
 
-            target = Path(tempdir) / filename
-            download(filename_ts, target, base_url=base_url)
-
-            assert target.exists()
-            assert target.is_file()
+            assert is_cached(filename_ts, Path(tempdir)) is False
+            download(filename_ts, Path(tempdir), base_url=base_url)
+            assert is_cached(filename_ts, Path(tempdir)) is True
 
 
 @pytest.mark.integration
