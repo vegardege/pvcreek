@@ -3,12 +3,12 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
+from pvcreek.filter import pre_filter
 from pvcreek.parse import Pageviews, parse
-from pvcreek.sift import sift
 from pvcreek.stream import BASE_URL, download, stream_local, stream_remote
 
 
-def pvcreek(
+def stream_from_server(
     filename: str | datetime,
     base_url: str = BASE_URL,
     cache_path: Optional[str | Path] = None,
@@ -55,7 +55,7 @@ def pvcreek(
         stream = stream_remote(filename, base_url=base_url)
 
     yield from parse(
-        sift(
+        pre_filter(
             stream,
             line_startswith,
             line_contains,

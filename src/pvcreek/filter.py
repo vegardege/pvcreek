@@ -3,7 +3,7 @@ from collections.abc import Callable, Generator, Iterable
 from typing import Optional
 
 
-def sift(
+def pre_filter(
     stream: Iterable[str],
     startswith: Optional[str] = None,
     contains: Optional[str] = None,

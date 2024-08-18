@@ -10,7 +10,7 @@ from pathlib import Path
 
 import pytest
 
-from pvcreek import pvcreek
+from pvcreek import stream_from_server
 from pvcreek.stream import download, is_cached, stream, stream_remote
 
 
@@ -25,7 +25,7 @@ def test_full() -> None:
         filename = "pageviews-20240803-060000.gz"
 
         # Test pure streaming
-        streamed_lines = list(pvcreek(filename, base_url=base_url))
+        streamed_lines = list(stream_from_server(filename, base_url=base_url))
         assert len(streamed_lines) == 1000
 
         # Test cached streaming
@@ -34,7 +34,7 @@ def test_full() -> None:
             # First pass should download the file
             assert is_cached(filename, Path(tempdir)) is False
             downloaded = list(
-                pvcreek(
+                stream_from_server(
                     filename,
                     base_url=base_url,
                     cache_path=tempdir,
@@ -48,7 +48,7 @@ def test_full() -> None:
             # apply a different filter when streaming.
             assert is_cached(filename, Path(tempdir)) is True
             downloaded = list(
-                pvcreek(
+                stream_from_server(
                     filename,
                     base_url=base_url,
                     cache_path=Path(tempdir),
